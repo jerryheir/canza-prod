@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('users')
 export class User {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
   @Column()
   firstname: string;
@@ -12,7 +12,7 @@ export class User {
   email: string;
   @Column()
   password: string;
-  @Column()
+  @Column({ default: null })
   image_url: string;
   @Column()
   role: string;

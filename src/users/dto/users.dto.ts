@@ -10,3 +10,10 @@ export class RegisterDto {
   @IsNotEmpty()
   readonly password: string;
 }
+
+export class LoginDto {
+  @IsEmail()
+  readonly email: string;
+  @IsNotEmpty()
+  readonly password: string;
+}

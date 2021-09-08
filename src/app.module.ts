@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
 import { User } from './users/users.entity';
 import { UsersService } from './users/users.service';
+import { UsersModule } from './users/users.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -19,8 +21,13 @@ import { UsersService } from './users/users.service';
       synchronize: true,
     }),
     TypeOrmModule.forFeature([User]),
+    JwtModule.register({
+      secret: 'secret',
+      signOptions: { expiresIn: '1d' },
+    }),
+    UsersModule,
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  controllers: [UsersController],
+  providers: [UsersService],
 })
 export class AppModule {}
