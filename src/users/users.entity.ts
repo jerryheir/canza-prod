@@ -16,6 +16,8 @@ export class User {
   image_url: string;
   @Column()
   role: string;
-  @Column()
+  @Column({ default: 0 })
   google_signin: 0 | 1;
+  @Column({ default: 0 })
+  verified: 0 | 1;
 }

@@ -17,3 +17,21 @@ export class LoginDto {
   @IsNotEmpty()
   readonly password: string;
 }
+
+export class ChangePasswordDto {
+  @IsEmail()
+  readonly email: string;
+  @IsNotEmpty()
+  readonly password: string;
+  @IsNotEmpty()
+  readonly newPassword: string;
+}
+
+export class EditProfileDto {
+  @IsEmail()
+  readonly email: string;
+  @IsNotEmpty()
+  firstname: string;
+  @IsNotEmpty()
+  lastname: string;
+}
