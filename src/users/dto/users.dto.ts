@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @IsNotEmpty()
@@ -38,6 +38,8 @@ export class EditProfileDto {
   firstname: string;
   @IsNotEmpty()
   lastname: string;
+  @IsOptional()
+  image_url?: string;
 }
 
 export class ResetDto {

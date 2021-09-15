@@ -13,14 +13,7 @@ import {
   getNewPassword,
   requestNewPassword,
 } from '../users/templates/verifyEmail';
-
-const transporter = nodemailer.createTransport({
-  service: 'hotmail',
-  auth: {
-    user: process.env.EMAIL_SMTP_ADDRESS,
-    pass: process.env.EMAIL_SMTP_PASSWORD,
-  },
-});
+import { API_VERSION } from 'src/helpers';
 
 @Injectable()
 export class UsersService {
@@ -29,22 +22,13 @@ export class UsersService {
     private readonly configService: ConfigService,
     private jwtService: JwtService,
   ) {}
-  private readonly items: User[] = [
-    {
-      id: 1,
-      firstname: 'Jerry',
-      lastname: 'Heir',
-      email: 'nwaezejerry@gmail.com',
-      password: null,
-      image_url: null,
-      role: 1,
-      google_signin: 0,
-      verified: 0,
-      banned: 0,
-      location: 1,
-      phone: null,
+  private readonly transporter = nodemailer.createTransport({
+    service: 'hotmail',
+    auth: {
+      user: this.configService.get('EMAIL_SMTP_ADDRESS'),
+      pass: this.configService.get('EMAIL_SMTP_PASSWORD'),
     },
-  ];
+  });
 
   async registerService(registerDto: RegisterDto) {
     const result = await this.usersRepository.save({
@@ -58,14 +42,14 @@ export class UsersService {
     const emailToken = this.jwtService.sign({
       id: result.id,
     });
-    const url = `http://localhost:8000/confirmation_code/${emailToken}`;
+    const url = `http://localhost:8000/${API_VERSION}confirmation_code/${emailToken}`;
     const options = {
-      from: '"no-reply@canza.com" <no-reply@canza.com>',
+      from: this.configService.get('EMAIL_SMTP_ADDRESS'),
       to: result.email,
       subject: 'Verify your email address',
       html: emailverification(url),
     };
-    transporter.sendMail(options, (err, info) => {
+    this.transporter.sendMail(options, (err, info) => {
       if (err) return Logger.log('Email Error: ' + err);
       Logger.log('Verification email sent! ' + info);
     });
@@ -86,12 +70,12 @@ export class UsersService {
 
   forgotPassword(email: string, newPassword: string, response: Response) {
     const options = {
-      from: '"no-reply@canza.com" <no-reply@canza.com>',
+      from: this.configService.get('EMAIL_SMTP_ADDRESS'),
       to: email,
       subject: 'Reset Password Instructions',
       html: getNewPassword(newPassword),
     };
-    transporter.sendMail(options, (err, info) => {
+    this.transporter.sendMail(options, (err, info) => {
       if (err) return Logger.log('Email Error: ' + err);
       Logger.log('Email sent! ' + info);
     });
@@ -108,14 +92,14 @@ export class UsersService {
         expiresIn: '15m',
       },
     );
-    const url = `http://localhost:8000/reset/${emailToken}`;
+    const url = `http://localhost:8000/${API_VERSION}reset/${emailToken}`;
     const options = {
-      from: '"no-reply@canza.com" <no-reply@canza.com>',
+      from: this.configService.get('EMAIL_SMTP_ADDRESS'),
       to: email,
       subject: 'Reset Password Instructions',
       html: requestNewPassword(url),
     };
-    transporter.sendMail(options, (err, info) => {
+    this.transporter.sendMail(options, (err, info) => {
       if (err) return Logger.log('Email Error: ' + err);
       Logger.log('Email sent! ' + info);
     });
@@ -124,9 +108,9 @@ export class UsersService {
   async upload(file) {
     const { originalname } = file;
     const bucketS3 = this.configService.get('AWS_S3_BUCKET_NAME');
-    const data = await this.uploadS3(file.buffer, bucketS3, originalname);
-    Logger.log('UPLOAD: ', data);
-    return data;
+    const name = originalname.trim().replace(/ /g, '');
+    const data = await this.uploadS3(file.buffer, bucketS3, name);
+    return data['Location'];
   }
 
   async uploadS3(file, bucket, name) {

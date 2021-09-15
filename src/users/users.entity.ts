@@ -13,7 +13,7 @@ export class User {
   @Column()
   password: string;
   @Column({ default: null })
-  image_url: string;
+  image_url?: string;
   @Column({ default: 1 }) // 1 for user, 2 for admin, 3 for maybe super admin
   role: number;
   @Column({ default: 0 })
@@ -22,7 +22,7 @@ export class User {
   verified: 0 | 1;
   @Column({ default: 0 })
   banned: 0 | 1;
-  @Column()
+  @Column({ default: 0 })
   location: number;
   @Column({ default: null })
   phone: string;

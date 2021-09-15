@@ -11,21 +11,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { API_VERSION } from '../helpers';
-import { responseData } from 'src/interfaces';
-import { RolesGuard } from 'src/roles.guard';
-import { UsersService } from 'src/users/users.service';
+import { responseData } from '../interfaces';
+import { RolesGuard } from '../roles.guard';
+// import { UsersService } from '../users/users.service';
 import { LocationCreateDto } from './dto/location.dto';
 import { LocationService } from './location.service';
 
 @Controller(`${API_VERSION}location`)
 export class LocationController {
   constructor(
-    private readonly usersService: UsersService,
+    // private readonly usersService: UsersService,
     private locationService: LocationService,
   ) {}
 
   @Get('/:id')
-  async getLocation(@Param() id: number): Promise<responseData> {
+  async getLocation(@Param('id') id: number): Promise<responseData> {
     try {
       const result = this.locationService.findOne({ id });
       return {
@@ -68,12 +68,12 @@ export class LocationController {
     }
   }
 
-  @Put('/update/:id')
+  @Put('/update/:locationId')
   @UseGuards(RolesGuard)
   async updateLocation(
     @Req() req,
     @Body() locationDto: LocationCreateDto,
-    @Param() locationId: number,
+    @Param('locationId') locationId: number,
   ) {
     console.log('REQUEST', req);
     try {

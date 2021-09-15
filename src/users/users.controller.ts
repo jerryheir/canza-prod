@@ -71,7 +71,7 @@ export class UsersController {
   ) {
     try {
       const user = await this.usersService.findOne({ email: loginDto.email });
-      if (!user) {
+      if (!user || (user && user.banned === 1)) {
         throw new BadRequestException('Invalid credentials');
       }
       if (!(await bcrypt.compare(loginDto.password, user.password))) {
@@ -85,7 +85,10 @@ export class UsersController {
             'This user has not verified their account. A new email has been sent!',
         });
       }
-      const jwt = this.jwtService.signAsync({ id: user.id, email: user.email });
+      const jwt = await this.jwtService.signAsync({
+        id: user.id,
+        email: user.email,
+      });
       response.cookie('x-token', jwt, { httpOnly: true });
       return {
         status: 'success',
@@ -103,17 +106,11 @@ export class UsersController {
     }
   }
 
-  @Get('users/:id')
+  @Get('users/me')
   @UseGuards(RolesGuard)
-  async getUser(@Req() request: Request, @Param() id: number) {
+  async getUser(@Req() request: Request) {
     try {
-      const cookie = request.cookies['x-token'];
-      const result = await this.jwtService.verifyAsync(cookie);
-      if (!result) {
-        Logger.log('No token');
-        throw new UnauthorizedException();
-      }
-      const user = await this.usersService.findOne({ id });
+      const user = request['guardUser'];
       return {
         status: 'success',
         message: 'Retrieved successfully',
@@ -136,7 +133,7 @@ export class UsersController {
   }
 
   @Get('confirmation_code/:token')
-  async confirm(@Res() response: Response, @Param() token: string) {
+  async confirm(@Res() response: Response, @Param('token') token: string) {
     try {
       const result = await this.jwtService.verifyAsync(token);
       if (result && result.id) {
@@ -148,11 +145,13 @@ export class UsersController {
             verified: true,
           },
         );
-        return response.send(verificationDone);
+        const str = verificationDone();
+        return response.send(str);
       } else {
         return response.send('An Error occurred. Please try again later!');
       }
     } catch (err: any) {
+      Logger.log('err', err);
       throw new UnauthorizedException();
     }
   }
@@ -175,7 +174,10 @@ export class UsersController {
   }
 
   @Get('reset/:token')
-  async resetPassword(@Res() response: Response, @Param() token: string) {
+  async resetPassword(
+    @Res() response: Response,
+    @Param('token') token: string,
+  ) {
     try {
       const result = await this.jwtService.verifyAsync(token);
       if (!result) return response.send('Reset Password link has expired!');
@@ -204,63 +206,78 @@ export class UsersController {
   }
 
   @Put('change-password')
+  @UseGuards(RolesGuard)
   async changePassword(
     @Body() changeDto: ChangePasswordDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const user = await this.usersService.findOne({ email: changeDto.email });
-    if (!user) {
-      throw new BadRequestException('Invalid credentials');
-    }
-    if (!(await bcrypt.compare(changeDto.password, user.password))) {
-      throw new BadRequestException('Invalid credentials');
-    }
-    const hashedPassword = await bcrypt.hash(changeDto.newPassword, 12);
-    await this.usersService.findAndUpdate(
-      {
+    try {
+      const user = await this.usersService.findOne({ email: changeDto.email });
+      if (!user) {
+        throw new BadRequestException('Invalid credentials');
+      }
+      if (!(await bcrypt.compare(changeDto.password, user.password))) {
+        throw new BadRequestException('Invalid credentials');
+      }
+      const hashedPassword = await bcrypt.hash(changeDto.newPassword, 12);
+      await this.usersService.findAndUpdate(
+        {
+          id: user.id,
+        },
+        {
+          password: hashedPassword,
+        },
+      );
+      const jwt = await this.jwtService.signAsync({
         id: user.id,
-      },
-      {
-        password: hashedPassword,
-      },
-    );
-    const jwt = this.jwtService.signAsync({ id: user.id, email: user.email });
-    response.cookie('x-token', jwt, { httpOnly: true });
-    return {
-      status: 'success',
-      message: 'Password change successful',
-      data: {
-        token: jwt,
-      },
-    };
+        email: user.email,
+      });
+      response.cookie('x-token', jwt, { httpOnly: true });
+      return {
+        status: 'success',
+        message: 'Password change successful',
+        data: {
+          token: jwt,
+        },
+      };
+    } catch (err) {
+      throw new InternalServerErrorException('Something went wrong!');
+    }
   }
 
-  @Put('edit-profile/:id')
-  async editUser(@Body() editDto: EditProfileDto, @Param('id') id: string) {
-    const user = await this.usersService.findOne({
-      id: id,
-      email: editDto.email,
-    });
-    if (!user) {
-      throw new BadRequestException('Invalid credentials');
+  @Put('edit-profile')
+  @UseGuards(RolesGuard)
+  async editUser(@Req() request: Request, @Body() editDto: EditProfileDto) {
+    try {
+      const user = request['guardUser'];
+      await this.usersService.findAndUpdate(
+        { id: user.id },
+        {
+          firstname: editDto.firstname,
+          lastname: editDto.lastname,
+        },
+      );
+      return {
+        status: 'success',
+        message: 'Profile updated successfully',
+      };
+    } catch (err) {
+      throw new InternalServerErrorException('Something went wrong!');
     }
-    await this.usersService.findAndUpdate(
-      { id: user.id },
-      {
-        firstname: editDto.firstname,
-        lastname: editDto.lastname,
-      },
-    );
-    return {
-      status: 'success',
-      message: 'Profile updated successfully',
-    };
   }
 
   @Post('profile-picture')
   @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file) {
+  @UseGuards(RolesGuard)
+  async upload(@Req() request: Request, @UploadedFile() file) {
+    const user = request['guardUser'];
     const data = await this.usersService.upload(file);
+    await this.usersService.findAndUpdate(
+      { id: user.id },
+      {
+        image_url: data,
+      },
+    );
     return {
       status: 'success',
       message: 'Photo uploaded successfully',
@@ -269,6 +286,7 @@ export class UsersController {
   }
 
   @Post('logout')
+  @UseGuards(RolesGuard)
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('x-token');
     return {
