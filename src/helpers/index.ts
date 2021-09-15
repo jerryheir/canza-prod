@@ -1,3 +1,5 @@
+export const API_VERSION = `api/v1/`;
+
 export const generateRandomHash = (length: number) => {
   let randomHash = '';
   const possible =

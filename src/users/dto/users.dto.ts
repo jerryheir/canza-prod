@@ -5,6 +5,7 @@ export class RegisterDto {
   firstname: string;
   @IsNotEmpty()
   lastname: string;
+  @IsNotEmpty()
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()
@@ -12,6 +13,7 @@ export class RegisterDto {
 }
 
 export class LoginDto {
+  @IsNotEmpty()
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()
@@ -19,6 +21,7 @@ export class LoginDto {
 }
 
 export class ChangePasswordDto {
+  @IsNotEmpty()
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()
@@ -28,10 +31,17 @@ export class ChangePasswordDto {
 }
 
 export class EditProfileDto {
+  @IsNotEmpty()
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()
   firstname: string;
   @IsNotEmpty()
   lastname: string;
+}
+
+export class ResetDto {
+  @IsNotEmpty()
+  @IsEmail()
+  readonly email: string;
 }
