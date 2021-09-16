@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
+      MYSQL_DATABASE: "${DATABASE_NAME}"
+      MYSQL_ROOT_USER: "${DATABASE_USERNAME}"
+      MYSQL_PASSWORD: "${DATABASE_PASSWORD}"
+    networks:
+      - app-network
+  backend:
+    build: . # Build image from local Dockerfile
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "${DATABASE_PORT}"
+      DATABASE_USERNAME: "${DATABASE_USERNAME}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      WAIT_HOSTS: mysql:3306
+    command: ["./wait-for-it/wait-for-it.sh", "db:3306", "--", "yarn",  "start:dev"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db # Wait until database service is loaded
+    networks:
+      - app-network
+networks: # Specify the network for bridging
+  app-network:
+    driver: bridge

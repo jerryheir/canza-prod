@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
 import { User } from './users/users.entity';
 import { UsersService } from './users/users.service';
-import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { LocationController } from './location/location.controller';
 import { LocationService } from './location/location.service';
@@ -22,6 +21,7 @@ import { Location } from './location/location.entity';
         username: config.get('DATABASE_USERNAME'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
+        // socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock',
         entities: [User, Location],
         synchronize: true,
       }),
@@ -36,7 +36,6 @@ import { Location } from './location/location.entity';
       }),
       inject: [ConfigService],
     }),
-    UsersModule,
   ],
   controllers: [UsersController, LocationController],
   providers: [UsersService, LocationService],
