@@ -7,6 +7,7 @@ RUN apt-get update
 RUN apt-get install \
     apt-transport-https \
     ca-certificates \
+    software-properties-common \
     curl \
     gnupg \
     lsb-release
@@ -15,7 +16,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
 RUN apt-key fingerprint 0EBFCD88
 
-RUN apt-repository "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+RUN add-apt-repository "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable"
 
 RUN apt-get update
