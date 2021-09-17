@@ -55,7 +55,6 @@ export class LocationController {
   @Post('/create')
   @UseGuards(RolesGuard)
   async createLocation(@Req() req, @Body() locationDto: LocationCreateDto) {
-    console.log('REQUEST', req);
     try {
       const result = await this.locationService.createLocation(locationDto);
       return {
@@ -75,7 +74,6 @@ export class LocationController {
     @Body() locationDto: LocationCreateDto,
     @Param('locationId') locationId: number,
   ) {
-    console.log('REQUEST', req);
     try {
       const result = await this.locationService.updateLocation(
         { id: locationId },
