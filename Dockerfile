@@ -15,12 +15,11 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
 RUN apt-key fingerprint 0EBFCD88
 
-RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  bionic stable"
+RUN echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 RUN apt-get update
 
-RUN apt-get install docker-ce docker-ce-cli containerd.io
+RUN apt-get install docker-io
 
 RUN git clone https://github.com/vishnubob/wait-for-it.git
 
