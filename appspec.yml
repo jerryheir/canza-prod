@@ -1,18 +1,18 @@
 version: 0.0
 os: linux
 files:
-  - source: /home/ec2-canza-user/canza-app
-  - destination: /home/ec2-canza-user/canza-app
+  - source: /
+  - destination: /home/ec2-user/canza-app
 hooks:
   ApplicationStop:
     - location: scripts/application_stop.sh
       timeout: 300
-      runas: ec2-canza-user
+      runas: ec2-user
   BeforeInstall:
     - location: scripts/before_install.sh
       timeout: 300
-      runas: ec2-canza-user
+      runas: ec2-user
   ApplicationStart:
     - location: scripts/application_start.sh
       timeout: 300
-      runas: ec2-canza-user    
+      runas: ec2-user    

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #give permission for everything in the canza-app directory
-sudo chmod -R 777 /home/ec2-canza-user/canza-app
+sudo chmod -R 777 /home/ec2-user/canza-app
 sudo amazon-linux-extras install docker
 sudo service docker start
-sudo usermod -a -G docker ec2-canza-user
+sudo usermod -a -G docker ec2-user
 
 # Download and install
 sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
@@ -12,7 +12,7 @@ sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-c
 sudo chmod +x /usr/local/bin/docker-compose
 
 #navigate into our working directory where we have all our github files
-cd /home/ec2-canza-user/canza-app
+cd /home/ec2-user/canza-app
 
 #add npm and node to path
 export NVM_DIR="$HOME/.nvm"	
