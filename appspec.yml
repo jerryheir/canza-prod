@@ -58,5 +58,5 @@ services:
   name: canza-api
   routes:
   - path: /
-  run_command: docker-compose up
+  run_command: yarn start:prod
   source_dir: /
