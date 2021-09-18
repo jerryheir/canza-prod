@@ -80,18 +80,3 @@ jobs:
         service: CanzaService
         cluster: CanzaCluster
         wait-for-service-stability: true
-
-    - name: Install node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.21.0
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Start containers
-      run: docker-compose -f "docker-compose.yml" up -d --build
-    
-    - name: Stop containers
-      if: always()
-      run: docker-compose -f "docker-compose.yml" down
