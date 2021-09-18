@@ -12,11 +12,10 @@ RUN ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 COPY . .
 
-# RUN yarn install
+RUN yarn install
 
-# RUN yarn build
+RUN yarn build
 
 EXPOSE 8000
 
-# CMD ["yarn", "start:prod"]
-CMD ["docker-compose", "up"]
+CMD ["yarn", "start:prod"]

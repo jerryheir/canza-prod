@@ -20,19 +20,19 @@ services:
     value: 15m
   - key: DATABASE_HOST
     scope: RUN_AND_BUILD_TIME
-    value: localhost
+    value: canza-mysql-db-do-user-9859120-0.b.db.ondigitalocean.com
   - key: DATABASE_PORT
     scope: RUN_AND_BUILD_TIME
-    value: "3306"
+    value: "25060"
   - key: DATABASE_USERNAME
     scope: RUN_AND_BUILD_TIME
-    value: root
+    value: doadmin
   - key: DATABASE_PASSWORD
     scope: RUN_AND_BUILD_TIME
-    value: mysql12345
+    value: Z7oBDxADnh7OB1yO
   - key: DATABASE_NAME
     scope: RUN_AND_BUILD_TIME
-    value: canza
+    value: defaultdb
   - key: EMAIL_SMTP_ADDRESS
     scope: RUN_AND_BUILD_TIME
     value: canzadev@outlook.com
