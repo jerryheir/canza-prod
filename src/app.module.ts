@@ -8,6 +8,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { LocationController } from './location/location.controller';
 import { LocationService } from './location/location.service';
 import { Location } from './location/location.entity';
+import { CoinsController } from './coins/coins.controller';
+import { OrdersController } from './orders/orders.controller';
+import { TransactionsController } from './transactions/transactions.controller';
+import { NotificationsController } from './notifications/notifications.controller';
+import { CoinsService } from './coins/coins.service';
+import { OrdersService } from './orders/orders.service';
+import { TransactionsService } from './transactions/transactions.service';
+import { NotificationsService } from './notifications/notifications.service';
 
 @Module({
   imports: [
@@ -21,7 +29,6 @@ import { Location } from './location/location.entity';
         username: config.get('DATABASE_USERNAME'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
-        // socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock',
         entities: [User, Location],
         synchronize: true,
       }),
@@ -37,7 +44,21 @@ import { Location } from './location/location.entity';
       inject: [ConfigService],
     }),
   ],
-  controllers: [UsersController, LocationController],
-  providers: [UsersService, LocationService],
+  controllers: [
+    UsersController,
+    LocationController,
+    CoinsController,
+    OrdersController,
+    TransactionsController,
+    NotificationsController,
+  ],
+  providers: [
+    UsersService,
+    LocationService,
+    CoinsService,
+    OrdersService,
+    TransactionsService,
+    NotificationsService,
+  ],
 })
 export class AppModule {}

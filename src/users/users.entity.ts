@@ -26,4 +26,8 @@ export class User {
   location: number;
   @Column({ default: null })
   phone: string;
+  @Column({ default: 0 })
+  wallet_balance: number;
+  @Column({ default: null })
+  fcm_token: string;
 }
