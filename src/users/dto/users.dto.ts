@@ -12,6 +12,22 @@ export class RegisterDto {
   readonly password: string;
 }
 
+export class AgentsDto {
+  @IsNotEmpty()
+  firstname: string;
+  @IsNotEmpty()
+  lastname: string;
+  @IsNotEmpty()
+  @IsEmail()
+  readonly email: string;
+  @IsNotEmpty()
+  readonly password: string;
+  @IsNotEmpty()
+  location: number;
+  @IsOptional()
+  image_url?: number;
+}
+
 export class LoginDto {
   @IsNotEmpty()
   @IsEmail()
@@ -35,11 +51,13 @@ export class EditProfileDto {
   @IsEmail()
   readonly email: string;
   @IsNotEmpty()
-  firstname: string;
+  firstname?: string;
   @IsNotEmpty()
-  lastname: string;
+  lastname?: string;
   @IsOptional()
   image_url?: string;
+  @IsNotEmpty()
+  location?: number;
 }
 
 export class ResetDto {

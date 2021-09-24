@@ -16,6 +16,10 @@ describe('UsersService', () => {
           useClass: Repository,
         },
         {
+          provide: 'ContactsRepository',
+          useClass: Repository,
+        },
+        {
           provide: JwtService,
           useValue: {
             verify: jest.fn(),

@@ -1,26 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
-import { CoinsService } from './coins.service';
+import { IssueService } from './issue.service';
 
-describe('CoinsService', () => {
-  let service: CoinsService;
+describe('IssueService', () => {
+  let service: IssueService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CoinsService,
+        IssueService,
         {
-          provide: 'CoinsRepository',
-          useClass: Repository,
-        },
-        {
-          provide: 'SupportedCoinsRepository',
+          provide: 'IssueRepository',
           useClass: Repository,
         },
       ],
     }).compile();
 
-    service = module.get<CoinsService>(CoinsService);
+    service = module.get<IssueService>(IssueService);
   });
 
   it('should be defined', () => {

@@ -63,7 +63,7 @@ export class LocationController {
         data: result,
       };
     } catch (err) {
-      throw new UnauthorizedException(err);
+      throw new UnauthorizedException('Unauthorized');
     }
   }
 
@@ -85,7 +85,7 @@ export class LocationController {
         data: result,
       };
     } catch (err) {
-      throw new UnauthorizedException(err);
+      throw new UnauthorizedException('Unauthorized');
     }
   }
 }

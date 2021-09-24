@@ -15,6 +15,8 @@ import {
   Logger,
   ForbiddenException,
   UseGuards,
+  Query,
+  Delete,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -23,8 +25,8 @@ import {
   ChangePasswordDto,
   EditProfileDto,
   ResetDto,
+  AgentsDto,
 } from './dto/users.dto';
-import { User } from './users.entity';
 import { UsersService } from './users.service';
 import * as bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
@@ -58,6 +60,30 @@ export class UsersController {
       return {
         status: 'success',
         message: 'Registration successful',
+      };
+    } catch (err) {
+      throw new InternalServerErrorException(err);
+    }
+  }
+
+  @Post('register/agents')
+  async registerAgents(@Body() registerDto: AgentsDto) {
+    try {
+      const hashedPassword = await bcrypt.hash(registerDto.password, 12);
+      const data = await this.usersService.findOne({
+        email: registerDto.email,
+      });
+      if (data) {
+        throw new BadRequestException('Agent already exists');
+      }
+      await this.usersService.registerService({
+        ...registerDto,
+        password: hashedPassword,
+        role: 2,
+      });
+      return {
+        status: 'success',
+        message: 'Agents Registration successful',
       };
     } catch (err) {
       throw new InternalServerErrorException(err);
@@ -120,6 +146,7 @@ export class UsersController {
           email: user.email,
           image_url: user.image_url,
           google_signin: user.google_signin,
+          wallet_balance: user.wallet_balance,
         },
       };
     } catch (err: any) {
@@ -127,10 +154,20 @@ export class UsersController {
     }
   }
 
-  @Get('users')
-  async getUsers(): Promise<User[]> {
-    return await this.usersService.findAll();
+  @Get('users/agents')
+  async getUsers() {
+    const data = await this.usersService.findAll({ role: 2 });
+    return {
+      status: 'success',
+      message: 'All agents fetched successfully',
+      data: data,
+    };
   }
+
+  // @Get('users')
+  // async getUsers(): Promise<User[]> {
+  //   return await this.usersService.findAll();
+  // }
 
   @Get('confirmation_code/:token')
   async confirm(@Res() response: Response, @Param('token') token: string) {
@@ -253,8 +290,7 @@ export class UsersController {
       await this.usersService.findAndUpdate(
         { id: user.id },
         {
-          firstname: editDto.firstname,
-          lastname: editDto.lastname,
+          ...editDto,
         },
       );
       return {
@@ -270,19 +306,23 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file'))
   @UseGuards(RolesGuard)
   async upload(@Req() request: Request, @UploadedFile() file) {
-    const user = request['guardUser'];
-    const data = await this.usersService.upload(file);
-    await this.usersService.findAndUpdate(
-      { id: user.id },
-      {
-        image_url: data,
-      },
-    );
-    return {
-      status: 'success',
-      message: 'Photo uploaded successfully',
-      data: data,
-    };
+    try {
+      const user = request['guardUser'];
+      const data = await this.usersService.upload(file);
+      await this.usersService.findAndUpdate(
+        { id: user.id },
+        {
+          image_url: data,
+        },
+      );
+      return {
+        status: 'success',
+        message: 'Photo uploaded successfully',
+        data: data,
+      };
+    } catch (err) {
+      throw new InternalServerErrorException();
+    }
   }
 
   @Post('logout')
@@ -293,5 +333,79 @@ export class UsersController {
       status: 'success',
       message: 'Log out successful',
     };
+  }
+
+  @Get('contacts/me')
+  @UseGuards(RolesGuard)
+  async getMyContacts(@Req() request: Request) {
+    try {
+      const user = request['guardUser'];
+      const data = await this.usersService.getMyContacts(user.id);
+      return {
+        status: 'success',
+        message: 'Contacts fetched successfully',
+        data: data,
+      };
+    } catch (err: any) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  @Post('contacts/add')
+  @UseGuards(RolesGuard)
+  async addContact(
+    @Req() request: Request,
+    @Body() contactDto: { contact_id: number },
+  ) {
+    const user = request['guardUser'];
+    await this.usersService.addContact({
+      userId: user.id,
+      contact_id: contactDto.contact_id,
+    });
+    return {
+      status: 'success',
+      message: 'Added contact successfully',
+    };
+  }
+
+  @Delete('contacts')
+  @UseGuards(RolesGuard)
+  async deleteContact(
+    @Req() request: Request,
+    @Body() contactDto: { contact_id: number },
+  ) {
+    const user = request['guardUser'];
+    await this.usersService.deleteContact({
+      userId: user.id,
+      contact_id: contactDto.contact_id,
+    });
+    return {
+      status: 'success',
+      message: 'Added deleted successfully',
+    };
+  }
+
+  @Get('users/get')
+  @UseGuards(RolesGuard)
+  async getAUser(@Query() query: any) {
+    try {
+      if (!query || !query.email) throw new BadRequestException();
+      const i = await this.usersService.findOne({ email: query.email });
+      const data = {
+        id: i.id,
+        email: i.email,
+        firstname: i.firstname,
+        lastname: i.lastname,
+        image_url: i.image_url,
+        phone: i.phone,
+      };
+      return {
+        status: 'success',
+        message: 'User fetched successfully',
+        data: data,
+      };
+    } catch (err: any) {
+      throw new ForbiddenException('Denied Access!');
+    }
   }
 }

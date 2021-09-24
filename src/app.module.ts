@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
 import { User } from './users/users.entity';
+import { Coins, SupportedCoins } from './coins/coins.entity';
 import { UsersService } from './users/users.service';
 import { JwtModule } from '@nestjs/jwt';
 import { LocationController } from './location/location.controller';
@@ -16,6 +17,11 @@ import { CoinsService } from './coins/coins.service';
 import { OrdersService } from './orders/orders.service';
 import { TransactionsService } from './transactions/transactions.service';
 import { NotificationsService } from './notifications/notifications.service';
+import { IssueController } from './issue/issue.controller';
+import { IssueService } from './issue/issue.service';
+import { Orders } from './orders/orders.entity';
+import { Notifications } from './notifications/notifications.entity';
+import { Issue } from './issue/issue.entity';
 
 @Module({
   imports: [
@@ -29,12 +35,28 @@ import { NotificationsService } from './notifications/notifications.service';
         username: config.get('DATABASE_USERNAME'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
-        entities: [User, Location],
+        entities: [
+          User,
+          Location,
+          Coins,
+          SupportedCoins,
+          Orders,
+          Notifications,
+          Issue,
+        ],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, Location]),
+    TypeOrmModule.forFeature([
+      User,
+      Location,
+      Coins,
+      SupportedCoins,
+      Orders,
+      Notifications,
+      Issue,
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -51,6 +73,7 @@ import { NotificationsService } from './notifications/notifications.service';
     OrdersController,
     TransactionsController,
     NotificationsController,
+    IssueController,
   ],
   providers: [
     UsersService,
@@ -59,6 +82,7 @@ import { NotificationsService } from './notifications/notifications.service';
     OrdersService,
     TransactionsService,
     NotificationsService,
+    IssueService,
   ],
 })
 export class AppModule {}

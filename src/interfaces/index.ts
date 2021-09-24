@@ -3,3 +3,12 @@ export interface responseData {
   message: string;
   data?: any;
 }
+
+export type Currency = 'ngn' | 'usd' | 'gbp';
+
+export interface notificationData {
+  userId: number;
+  type: 'order' | 'issue' | 'swap';
+  description: string;
+  metadata: any;
+}
