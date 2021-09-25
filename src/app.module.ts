@@ -22,6 +22,7 @@ import { IssueService } from './issue/issue.service';
 import { Orders } from './orders/orders.entity';
 import { Notifications } from './notifications/notifications.entity';
 import { Issue } from './issue/issue.entity';
+import { Transactions } from './transactions/transactions.entity';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { Issue } from './issue/issue.entity';
           Orders,
           Notifications,
           Issue,
+          Transactions,
         ],
         synchronize: true,
       }),
@@ -56,6 +58,7 @@ import { Issue } from './issue/issue.entity';
       Orders,
       Notifications,
       Issue,
+      Transactions,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
