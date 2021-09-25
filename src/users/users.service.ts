@@ -93,7 +93,8 @@ export class UsersService {
       image_url: i.image_url,
       phone: i.phone,
       banned: i.banned,
-      // wallet_balance: i.wallet_balance,
+      wallet_balance: i.wallet_balance,
+      password: i.password,
     };
   }
 

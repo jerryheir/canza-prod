@@ -165,7 +165,7 @@ export class UsersController {
   }
 
   // @Get('users')
-  // async getUsers(): Promise<User[]> {
+  // async getAllUsers(): Promise<any[]> {
   //   return await this.usersService.findAll();
   // }
 

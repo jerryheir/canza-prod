@@ -21,7 +21,7 @@ import { LocationService } from './location.service';
 export class LocationController {
   constructor(
     // private readonly usersService: UsersService,
-    private locationService: LocationService,
+    private readonly locationService: LocationService,
   ) {}
 
   @Get('/:id')
@@ -56,14 +56,20 @@ export class LocationController {
   @UseGuards(RolesGuard)
   async createLocation(@Req() req, @Body() locationDto: LocationCreateDto) {
     try {
-      const result = await this.locationService.createLocation(locationDto);
-      return {
-        status: 'success',
-        message: 'Location created successfully',
-        data: result,
-      };
+      const user = req['guardUser'];
+      if (user && user.role > 2) {
+        const result = await this.locationService.createLocation(locationDto);
+        return {
+          status: 'success',
+          message: 'Location created successfully',
+          data: result,
+        };
+      } else {
+        throw new UnauthorizedException();
+      }
     } catch (err) {
-      throw new UnauthorizedException('Unauthorized');
+      console.log('/create', err);
+      throw new InternalServerErrorException(err);
     }
   }
 
