@@ -65,3 +65,8 @@ export class ResetDto {
   @IsEmail()
   readonly email: string;
 }
+
+export class FundWalletDto {
+  @IsNotEmpty()
+  amount: number;
+}

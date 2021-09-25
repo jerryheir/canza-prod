@@ -10,8 +10,8 @@ export class OrdersService {
     private readonly ordersRepository: Repository<Orders>,
   ) {}
 
-  async getAllOrders() {
-    return await this.ordersRepository.find();
+  async getAllOrders(object?: any) {
+    return await this.ordersRepository.find(object);
   }
 
   async getAnOrder(object: any) {

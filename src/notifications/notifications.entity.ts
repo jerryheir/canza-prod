@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('notifications')
 export class Notifications {
@@ -10,6 +16,10 @@ export class Notifications {
   type: 'order' | 'issue' | 'swap';
   @Column()
   description: string;
-  @Column({ default: null })
+  @Column({ type: 'text' })
   metadata: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  updated_at: Date;
 }

@@ -15,7 +15,7 @@ import {
 import { Request } from 'express';
 import { NotificationsService } from '../notifications/notifications.service';
 import { API_VERSION } from '../helpers';
-import { Currency, responseData } from '../interfaces';
+import { responseData } from '../interfaces';
 import { RolesGuard } from '../roles.guard';
 import { CoinsService } from './coins.service';
 import {
@@ -39,7 +39,7 @@ export class CoinsController {
     @Query('currency') currency: string,
   ): Promise<responseData> {
     try {
-      const c = currency.split(',');
+      const c = currency ? currency.split(',') : [];
       const user = request['guardUser'];
       const curr = c && c.length > 0 ? c : ['ngn'];
       const my_coins = await this.coinsService.findMyCoins({ userId: user.id });
@@ -55,7 +55,6 @@ export class CoinsController {
           ...item,
         };
       });
-      console.log('BEFORE return getCoins', data);
       return {
         status: 'success',
         message: 'All Supported Coins',
@@ -70,11 +69,11 @@ export class CoinsController {
   @Get('swap-rate/:primary')
   @UseGuards(RolesGuard)
   async getSwapRate(
-    @Param() primary: string,
+    @Param('primary') primary: string,
     @Query('coins') coins: string,
   ): Promise<responseData> {
     try {
-      const c = coins.split(',');
+      const c = coins ? coins.split(',') : [];
       const data = await this.coinsService.getSwapRate(primary, c);
       return {
         status: 'success',
@@ -143,10 +142,10 @@ export class CoinsController {
   @Get()
   @UseGuards(RolesGuard)
   async getSupportedCoins(
-    @Query('currency') currency: string,
+    @Query('currency') currency?: string,
   ): Promise<responseData> {
     try {
-      const c = currency.split(',');
+      const c = currency ? currency.split(',') : [];
       const curr = c && c.length > 0 ? c : ['ngn', 'usd', 'gbp'];
       const data = await this.coinsService.findSupportedCoinsAll(curr);
       return {
@@ -168,7 +167,10 @@ export class CoinsController {
   ): Promise<responseData> {
     try {
       const user = request['guardUser'];
-      if (user.role && user.role > 2) {
+      const supported = await this.coinsService.getOneSupportedCoin({
+        type: supportedCoins.type,
+      });
+      if (!supported && user.role && user.role > 2) {
         await this.coinsService.createSupportedCoin(supportedCoins);
         return {
           status: 'success',
@@ -236,12 +238,12 @@ export class CoinsController {
           userId: user.id,
           supported_coin_id: createSwapDto.to,
         });
-        const supported = await this.coinsService.getOneSupportedCoin(
-          createSwapDto.from,
-        );
-        const otherSupported = await this.coinsService.getOneSupportedCoin(
-          createSwapDto.to,
-        );
+        const supported = await this.coinsService.getOneSupportedCoin({
+          id: createSwapDto.from,
+        });
+        const otherSupported = await this.coinsService.getOneSupportedCoin({
+          id: createSwapDto.to,
+        });
         const swapRate = await this.coinsService.getSwapRate(
           supported.coin_name,
           [otherSupported.type],

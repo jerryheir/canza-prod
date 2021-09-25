@@ -36,7 +36,7 @@ export class OrdersController {
   async getMyOrders(@Req() request: Request): Promise<responseData> {
     try {
       const user = request['guardUser'];
-      const data = await this.ordersService.getAnOrder({ userId: user.id });
+      const data = await this.ordersService.getAllOrders({ userId: user.id });
       return {
         status: 'success',
         message: 'Orders retrieved successfully',
@@ -77,9 +77,9 @@ export class OrdersController {
   ): Promise<responseData> {
     try {
       const order = await this.ordersService.getAnOrder({ id: id });
-      const supported = await this.coinsService.getOneSupportedCoin(
-        order.supported_coin_id,
-      );
+      const supported = await this.coinsService.getOneSupportedCoin({
+        id: order.supported_coin_id,
+      });
       if (
         order &&
         updateOrderDto &&
@@ -115,8 +115,9 @@ export class OrdersController {
             status: 'success',
             message: 'Order updated successfully',
           };
+        } else {
+          throw new BadRequestException();
         }
-        throw new BadRequestException();
       } else {
         throw new BadRequestException();
       }
@@ -138,9 +139,9 @@ export class OrdersController {
         id: id,
         resolved_by: user.id,
       });
-      const supported = await this.coinsService.getOneSupportedCoin(
-        order.supported_coin_id,
-      );
+      const supported = await this.coinsService.getOneSupportedCoin({
+        id: order.supported_coin_id,
+      });
       if (order) {
         await this.ordersService.updateMyOrder(
           {
@@ -178,31 +179,34 @@ export class OrdersController {
   async createOrder(
     @Req() request: Request,
     @Body() createOrderDto: CreateOrderDto,
-  ): Promise<responseData> {
+  ) {
     try {
       const user: User = request['guardUser'];
-      const supported = await this.coinsService.getOneSupportedCoin(
-        createOrderDto.supported_coin_id,
-      );
-      const swapRate = await this.coinsService.getSwapRate(
+      const supported = await this.coinsService.getOneSupportedCoin({
+        id: createOrderDto.supported_coin_id,
+      });
+      /*const swapRate = await this.coinsService.getSwapRate(
         supported.coin_name,
         ['ngn'],
       );
       const rate =
-        swapRate.find((a) => a.currency === supported.type).value *
-        createOrderDto.amount;
+        swapRate.find((a) => a.currency === 'ngn').value *
+        createOrderDto.amount;*/
       if (createOrderDto.buy_type === 1) {
-        if (user.wallet_balance < createOrderDto.request_amount) {
-          throw new BadRequestException(
+        if (user.wallet_balance - createOrderDto.request_amount < 0) {
+          return new BadRequestException(
             'Insufficient funds. Fund your wallet and try again.',
           );
         }
-        this.usersService.findAndUpdate(
+        await this.usersService.findAndUpdate(
           {
             id: user.id,
           },
           {
-            wallet_balance: user.wallet_balance - rate,
+            wallet_balance:
+              user.wallet_balance - createOrderDto.request_amount >= 0
+                ? user.wallet_balance - createOrderDto.request_amount
+                : user.wallet_balance,
           },
         );
       }
@@ -212,20 +216,20 @@ export class OrdersController {
           supported_coin_id: createOrderDto.supported_coin_id,
         });
         if (
-          myCoin.amount <
-          createOrderDto.amount /* Subtract the percentage for fee also */
+          myCoin.amount - createOrderDto.amount <
+          0 /* Subtract the percentage for fee also */
         ) {
-          throw new BadRequestException(
-            'Insufficient assets. Check your assets and try again',
+          return new BadRequestException(
+            'Insufficient assets. Check your assets and try again.',
           );
         }
-        this.coinsService.updateMyCoin(myCoin.id, {
+        await this.coinsService.updateMyCoin(myCoin.id, {
           amount:
             myCoin.amount -
             createOrderDto.amount /* Subtract the percentage for fee also */,
         });
       }
-      await this.ordersService.createOrder({
+      const data = await this.ordersService.createOrder({
         ...createOrderDto,
         userId: user.id,
       });
@@ -245,6 +249,7 @@ export class OrdersController {
       return {
         status: 'success',
         message: 'Order created successfully',
+        data: data,
       };
     } catch (err) {
       console.log(err);

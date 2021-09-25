@@ -1,5 +1,11 @@
 import { Currency } from '../interfaces';
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('orders')
 export class Orders {
@@ -7,8 +13,6 @@ export class Orders {
   id: number;
   @Column()
   userId: number;
-  // @Column()
-  // post_type: number;
   @Column()
   buy_type: 1 | 2; // 1 for buy and 2 for sell
   @Column()
@@ -21,12 +25,16 @@ export class Orders {
   resolved_status: 'created' | 'pending' | 'completed';
   @Column({ default: null })
   resolved_by: number;
-  @Column()
+  @Column({ default: 1 })
   location_id: number;
   @Column({ default: null })
   amount_resolved_at: number;
   @Column({ default: null })
   currency_resolved_at: Currency;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  updated_at: Date;
 }
 
 @Entity('swaptoken')

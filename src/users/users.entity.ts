@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -13,7 +19,7 @@ export class User {
   @Column()
   password: string;
   @Column({ default: null })
-  image_url?: string;
+  image_url: string;
   @Column({ default: 1 }) // 1 for user, 2 for agents, 3 for maybe admin
   role: number;
   @Column({ default: 0 })
@@ -30,6 +36,10 @@ export class User {
   wallet_balance: number;
   @Column({ default: null })
   fcm_token: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  updated_at: Date;
 }
 
 @Entity('contacts')

@@ -95,6 +95,7 @@ export class UsersService {
       banned: i.banned,
       wallet_balance: i.wallet_balance,
       password: i.password,
+      role: i.role,
     };
   }
 

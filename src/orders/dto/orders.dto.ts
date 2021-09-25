@@ -1,17 +1,15 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Currency } from '../../interfaces';
 
 export class CreateOrderDto {
-  @IsNotEmpty()
-  post_type: number;
   @IsNotEmpty()
   buy_type: 1 | 2; // 1 for buy and 2 for sell
   @IsNotEmpty()
   supported_coin_id: number;
   @IsNotEmpty()
   amount: number;
-  @IsNotEmpty()
-  location_id: number;
+  @IsOptional()
+  location_id?: number;
   @IsNotEmpty()
   request_amount: number;
 }

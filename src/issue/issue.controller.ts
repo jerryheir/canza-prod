@@ -81,7 +81,7 @@ export class IssueController {
       });
       return {
         status: 'success',
-        message: `Issue fetched successfully`,
+        message: `Issues fetched successfully`,
         data: data,
       };
     } catch (err) {

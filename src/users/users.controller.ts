@@ -26,6 +26,7 @@ import {
   EditProfileDto,
   ResetDto,
   AgentsDto,
+  FundWalletDto,
 } from './dto/users.dto';
 import { UsersService } from './users.service';
 import * as bcrypt from 'bcrypt';
@@ -35,12 +36,14 @@ import { API_VERSION, generateRandomHash } from '../helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { responseData } from '../interfaces';
 import { RolesGuard } from '../roles.guard';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Controller(`${API_VERSION}`)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   @Post('register')
@@ -409,6 +412,89 @@ export class UsersController {
         message: 'User fetched successfully',
         data: data,
       };
+    } catch (err: any) {
+      throw new ForbiddenException('Denied Access!');
+    }
+  }
+
+  @Put('fund-wallet')
+  @UseGuards(RolesGuard)
+  async fundWallet(
+    @Req() request: Request,
+    @Body() fundWalletDto: FundWalletDto,
+  ) {
+    try {
+      const user = request['guardUser'];
+      if (!fundWalletDto || !fundWalletDto.amount) {
+        throw new BadRequestException();
+      }
+      await this.usersService.findAndUpdate(
+        { id: user.id },
+        { wallet_balance: user.wallet_balance + fundWalletDto.amount },
+      );
+      await this.transactionsService.createTransactions({
+        userId: user.id,
+        type: 'credit',
+        description: `You have just funded your wallet with NGN ${fundWalletDto.amount}`,
+        metadata: JSON.stringify({
+          type: 'credit',
+          amount: fundWalletDto.amount,
+        }),
+      });
+      return {
+        status: 'success',
+        message: 'User fetched successfully',
+        data: {
+          wallet_balance: user.wallet_balance + fundWalletDto.amount,
+        },
+      };
+    } catch (err: any) {
+      throw new ForbiddenException('Denied Access!');
+    }
+  }
+
+  @Put('withdraw')
+  @UseGuards(RolesGuard)
+  async withdraw(
+    @Req() request: Request,
+    @Body() fundWalletDto: FundWalletDto,
+  ) {
+    try {
+      const user = request['guardUser'];
+      if (
+        !fundWalletDto ||
+        !fundWalletDto.amount ||
+        user.wallet_balance - fundWalletDto.amount < 0
+      ) {
+        throw new BadRequestException();
+      }
+      if (user.wallet_balance - fundWalletDto.amount >= 0) {
+        await this.usersService.findAndUpdate(
+          { id: user.id },
+          { wallet_balance: user.wallet_balance - fundWalletDto.amount },
+        );
+        await this.transactionsService.createTransactions({
+          userId: user.id,
+          type: 'debit',
+          description: `You have successfully requested a withdrawal of NGN ${fundWalletDto.amount} from your Canza Wallet`,
+          metadata: JSON.stringify({
+            type: 'debit',
+            amount: fundWalletDto.amount,
+          }),
+        });
+        return {
+          status: 'success',
+          message: 'Withdraw process successfully',
+          data: {
+            wallet_balance: user.wallet_balance - fundWalletDto.amount,
+          },
+        };
+      } else {
+        return {
+          status: 'error',
+          message: 'Withdraw process failed. Try again later.',
+        };
+      }
     } catch (err: any) {
       throw new ForbiddenException('Denied Access!');
     }

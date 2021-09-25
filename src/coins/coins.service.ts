@@ -7,6 +7,8 @@ import { Currency } from '../interfaces';
 
 const COINGECKO_BASE_URL = 'https://api.coingecko.com/api/v3/';
 
+// simple/supported_vs_currencies // shows all supported currencies
+
 @Injectable()
 export class CoinsService {
   constructor(
@@ -36,18 +38,20 @@ export class CoinsService {
         };
       }),
     );*/
-    Logger.log('findSupportedCoinsAll', info);
+    // Logger.log('findSupportedCoinsAll ', info);
     const data = supported_coins
       .map((item) => {
         const value = info[item.coin_name];
         if (value) {
-          const prices = Object.keys(value).map((a: Currency) => {
-            return {
-              currency: a,
-              value: value[a],
-              change_24hr: value[`${a}_24h_change`],
-            };
-          });
+          const prices = Object.keys(value)
+            .filter((b) => !b.includes('_24h_change'))
+            .map((a: Currency) => {
+              return {
+                currency: a,
+                value: value[a],
+                change_24hr: value[`${a}_24h_change`],
+              };
+            });
           return {
             ...item,
             prices: prices,
@@ -104,8 +108,8 @@ export class CoinsService {
     );
   }
 
-  async getOneSupportedCoin(id: number) {
-    return await this.supCoinsRepository.findOne({ id: id });
+  async getOneSupportedCoin(object: any) {
+    return await this.supCoinsRepository.findOne(object);
   }
 
   async addMyCoin(object: any) {
