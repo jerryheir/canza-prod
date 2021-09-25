@@ -36,11 +36,12 @@ export class CoinsController {
   @UseGuards(RolesGuard)
   async getCoins(
     @Req() request: Request,
-    @Query('currency') currency: Currency[],
+    @Query('currency') currency: string,
   ): Promise<responseData> {
     try {
+      const c = currency.split(',');
       const user = request['guardUser'];
-      const curr = currency && currency.length > 0 ? currency : ['ngn'];
+      const curr = c && c.length > 0 ? c : ['ngn'];
       const my_coins = await this.coinsService.findMyCoins({ userId: user.id });
       const supported_coins = await this.coinsService.findSupportedCoinsAll(
         curr,
@@ -69,10 +70,11 @@ export class CoinsController {
   @UseGuards(RolesGuard)
   async getSwapRate(
     @Param() primary: string,
-    @Query('coins') coins: string[],
+    @Query('coins') coins: string,
   ): Promise<responseData> {
     try {
-      const data = await this.coinsService.getSwapRate(primary, coins);
+      const c = coins.split(',');
+      const data = await this.coinsService.getSwapRate(primary, c);
       return {
         status: 'success',
         message: 'Swap rates returned successfully',
@@ -138,11 +140,11 @@ export class CoinsController {
   @Get()
   @UseGuards(RolesGuard)
   async getSupportedCoins(
-    @Query('currency') currency: Currency[],
+    @Query('currency') currency: string,
   ): Promise<responseData> {
     try {
-      const curr =
-        currency && currency.length > 0 ? currency : ['ngn', 'usd', 'gbp'];
+      const c = currency.split(',');
+      const curr = c && c.length > 0 ? c : ['ngn', 'usd', 'gbp'];
       const data = await this.coinsService.findSupportedCoinsAll(curr);
       return {
         status: 'success',
