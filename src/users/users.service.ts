@@ -190,6 +190,7 @@ export class UsersService {
       }
       return user;
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -201,9 +202,11 @@ export class UsersService {
       const user = await this.usersRepository.findOne({ id });
       if (user && user.role > 2) {
         return user;
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
-      throw new UnauthorizedException('Unauthorized');
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -239,6 +242,7 @@ export class UsersService {
       await this.contactsRepository.save(object);
       return object;
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }
@@ -248,6 +252,7 @@ export class UsersService {
       await this.contactsRepository.delete(object);
       return true;
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }

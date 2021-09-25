@@ -38,6 +38,7 @@ export class IssueController {
         message: `Issue created successfully`,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }
@@ -65,6 +66,7 @@ export class IssueController {
         message: `Issue updated successfully`,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }
@@ -83,6 +85,7 @@ export class IssueController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }
@@ -99,9 +102,11 @@ export class IssueController {
           message: `All Issues fetched successfully`,
           data: data,
         };
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
-      throw new UnauthorizedException();
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException();
     }
   }

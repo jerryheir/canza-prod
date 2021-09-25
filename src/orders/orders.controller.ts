@@ -43,6 +43,7 @@ export class OrdersController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('An error occurred!');
     }
   }
@@ -59,9 +60,11 @@ export class OrdersController {
           message: 'Orders retrieved successfully',
           data: data,
         };
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
-      throw new UnauthorizedException('Unauthorized');
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -114,9 +117,11 @@ export class OrdersController {
           };
         }
         throw new BadRequestException();
+      } else {
+        throw new BadRequestException();
       }
-      throw new BadRequestException();
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('An error occurred!');
     }
   }
@@ -159,9 +164,11 @@ export class OrdersController {
           status: 'success',
           message: 'Order resolved successfully',
         };
+      } else {
+        throw new BadRequestException();
       }
-      throw new BadRequestException();
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('An error occurred!');
     }
   }
@@ -230,13 +237,17 @@ export class OrdersController {
         } ${
           createOrderDto.amount
         } ${supported.type.toUpperCase()} was posted on the Canza Market Place.`,
-        metadata: JSON.stringify({ ...createOrderDto, resolved_status: 'created' }),
+        metadata: JSON.stringify({
+          ...createOrderDto,
+          resolved_status: 'created',
+        }),
       });
       return {
         status: 'success',
         message: 'Order created successfully',
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('An error occurred!');
     }
   }

@@ -91,6 +91,7 @@ export class LocationController {
         data: result,
       };
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }

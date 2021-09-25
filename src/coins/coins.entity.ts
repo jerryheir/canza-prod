@@ -17,9 +17,17 @@ export class SupportedCoins {
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
-  type: 'btc' | 'eth' | 'cusd';
+  type: 'btc' | 'eth' | 'ltc' | 'bch' | 'xrp';
   @Column()
   image_url: string;
   @Column()
   coin_name: string;
 }
+
+// bch https://www.bitcoin.com/images/uploads/homepage-ticker-bch.png bitcoin-cash
+
+// eth https://markets.bitcoin.com/images/coins/1027.png // ethereum
+
+// xrp https://markets.bitcoin.com/images/coins/52.png // ripple
+
+// ltc https://markets.bitcoin.com/images/coins/2.png litecoin

@@ -23,6 +23,7 @@ export class TransactionsController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }

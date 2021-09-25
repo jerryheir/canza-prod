@@ -29,6 +29,7 @@ export class NotificationsController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }

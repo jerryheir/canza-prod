@@ -62,6 +62,7 @@ export class UsersController {
         message: 'Registration successful',
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -86,6 +87,7 @@ export class UsersController {
         message: 'Agents Registration successful',
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -278,6 +280,7 @@ export class UsersController {
         },
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('Something went wrong!');
     }
   }
@@ -298,6 +301,7 @@ export class UsersController {
         message: 'Profile updated successfully',
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('Something went wrong!');
     }
   }
@@ -321,6 +325,7 @@ export class UsersController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }

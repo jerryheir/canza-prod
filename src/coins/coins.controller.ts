@@ -62,6 +62,7 @@ export class CoinsController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -81,6 +82,7 @@ export class CoinsController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -96,6 +98,7 @@ export class CoinsController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -152,6 +155,7 @@ export class CoinsController {
         data: data,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(err);
     }
   }
@@ -170,9 +174,11 @@ export class CoinsController {
           status: 'success',
           message: 'Coin successfully added!',
         };
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
-      throw new UnauthorizedException('Unauthorized');
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -195,9 +201,11 @@ export class CoinsController {
           status: 'success',
           message: 'Coin updated successfully!',
         };
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
-      throw new UnauthorizedException('Unauthorized');
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -291,6 +299,7 @@ export class CoinsController {
           'Something went wrong. Please check your canza wallet and try again',
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('An error occurred!');
     }
   }
@@ -332,6 +341,7 @@ export class CoinsController {
         message: `Asset sent successfully`,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }

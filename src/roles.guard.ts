@@ -29,6 +29,7 @@ export class RolesGuard implements CanActivate {
       req['guardUser'] = user;
       return true;
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
