@@ -11,5 +11,5 @@ export class Notifications {
   @Column()
   description: string;
   @Column({ default: null })
-  metadata: any;
+  metadata: string;
 }

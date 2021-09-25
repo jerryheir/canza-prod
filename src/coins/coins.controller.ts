@@ -255,7 +255,7 @@ export class CoinsController {
             description: `You have successfully swapped ${
               createSwapDto.from
             } ${supported.type.toUpperCase()} to ${rate} ${otherSupported.type.toUpperCase()}`,
-            metadata: { ...updatedResult },
+            metadata: JSON.stringify({ ...updatedResult }),
           });
           return {
             status: 'success',
@@ -274,7 +274,7 @@ export class CoinsController {
             description: `You have successfully swapped ${
               createSwapDto.amount
             } ${supported.type.toUpperCase()} to ${rate} ${otherSupported.type.toUpperCase()}`,
-            metadata: { ...updatedResult },
+            metadata: JSON.stringify({ ...updatedResult }),
           });
           return {
             status: 'success',

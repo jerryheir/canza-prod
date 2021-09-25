@@ -11,5 +11,5 @@ export class Transactions {
   @Column()
   description: string;
   @Column({ default: false })
-  metadata: any;
+  metadata: string;
 }

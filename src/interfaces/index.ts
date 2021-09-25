@@ -10,5 +10,5 @@ export interface notificationData {
   userId: number;
   type: 'order' | 'issue' | 'swap';
   description: string;
-  metadata: any;
+  metadata: string;
 }

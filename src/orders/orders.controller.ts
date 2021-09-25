@@ -106,7 +106,7 @@ export class OrdersController {
             } ${supported.type.toUpperCase()} has been accepted by ${
               resolvingUser.firstname
             } ${resolvingUser.lastname}.`,
-            metadata: { ...order, resolved_status: 'pending' },
+            metadata: JSON.stringify({ ...order, resolved_status: 'pending' }),
           });
           return {
             status: 'success',
@@ -153,7 +153,7 @@ export class OrdersController {
           } ${
             order.amount
           } ${supported.type.toUpperCase()} has been completed.`,
-          metadata: { ...order, resolved_status: 'completed' },
+          metadata: JSON.stringify({ ...order, resolved_status: 'completed' }),
         });
         return {
           status: 'success',
@@ -230,7 +230,7 @@ export class OrdersController {
         } ${
           createOrderDto.amount
         } ${supported.type.toUpperCase()} was posted on the Canza Market Place.`,
-        metadata: { ...createOrderDto, resolved_status: 'created' },
+        metadata: JSON.stringify({ ...createOrderDto, resolved_status: 'created' }),
       });
       return {
         status: 'success',
