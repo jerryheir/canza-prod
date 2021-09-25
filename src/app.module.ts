@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
-import { User } from './users/users.entity';
+import { Contacts, User } from './users/users.entity';
 import { Coins, SupportedCoins } from './coins/coins.entity';
 import { UsersService } from './users/users.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -45,6 +45,7 @@ import { Transactions } from './transactions/transactions.entity';
           Notifications,
           Issue,
           Transactions,
+          Contacts,
         ],
         synchronize: true,
       }),
@@ -59,6 +60,7 @@ import { Transactions } from './transactions/transactions.entity';
       Notifications,
       Issue,
       Transactions,
+      Contacts,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
