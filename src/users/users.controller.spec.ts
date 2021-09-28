@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { JwtService } from '@nestjs/jwt';
+import { TransactionsService } from '../transactions/transactions.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -33,6 +34,13 @@ describe('UsersController', () => {
             verifyAsync: jest.fn(),
             sign: jest.fn(),
             signAsync: jest.fn(),
+          },
+        },
+        {
+          provide: TransactionsService,
+          useValue: {
+            createTransactions: jest.fn(),
+            getMyTransactions: jest.fn(),
           },
         },
       ],

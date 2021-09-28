@@ -417,6 +417,21 @@ export class UsersController {
     }
   }
 
+  @Get('agents')
+  @UseGuards(RolesGuard)
+  async getAgents() {
+    try {
+      const data = await this.usersService.findAll({ role: 2 });
+      return {
+        status: 'success',
+        message: 'Agents fetched successfully',
+        data: data.filter((i) => i.banned === 0),
+      };
+    } catch (err: any) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   @Put('fund-wallet')
   @UseGuards(RolesGuard)
   async fundWallet(

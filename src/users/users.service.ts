@@ -45,9 +45,14 @@ export class UsersService {
   }
 
   verifyEmail(result: { id: number; email: string }) {
-    const emailToken = this.jwtService.sign({
-      id: result.id,
-    });
+    const emailToken = this.jwtService.sign(
+      {
+        id: result.id,
+      },
+      {
+        expiresIn: '15m',
+      },
+    );
     const url = `https://canza-api-6dbce.ondigitalocean.app/${API_VERSION}confirmation_code/${emailToken}`;
     const options = {
       from: this.configService.get('EMAIL_SMTP_ADDRESS'),
