@@ -14,7 +14,7 @@ services:
     value: CanzaToTheWorld@2021
   - key: JWT_EXPIRE_TIME
     scope: RUN_AND_BUILD_TIME
-    value: 1d
+    value: 30d
   - key: RESET_EXPIRE_TIME
     scope: RUN_AND_BUILD_TIME
     value: 15m
