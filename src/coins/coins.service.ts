@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import axios from 'axios';
@@ -113,11 +113,11 @@ export class CoinsService {
   }
 
   async addMyCoin(object: any) {
-    return await this.supCoinsRepository.save(object);
+    return await this.coinsRepository.save(object);
   }
 
   async updateMyCoin(coin_id: number, object: any) {
-    return await this.supCoinsRepository.update(
+    return await this.coinsRepository.update(
       {
         id: coin_id,
       },
