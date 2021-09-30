@@ -129,6 +129,7 @@ export class UsersController {
           lastname: user.lastname,
           email: user.email,
           image_url: user.image_url,
+          wallet_balance: user.wallet_balance,
           token: jwt,
         },
       };

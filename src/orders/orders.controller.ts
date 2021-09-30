@@ -139,10 +139,27 @@ export class OrdersController {
         id: id,
         resolved_by: user.id,
       });
+      const coin = await this.coinsService.findOneCoin({
+        userId: order.userId,
+        supported_coin_id: order.supported_coin_id,
+      });
       const supported = await this.coinsService.getOneSupportedCoin({
         id: order.supported_coin_id,
       });
       if (order) {
+        if (coin) {
+          await this.coinsService.updateMyCoin(coin.id, {
+            amount: coin.amount + order.amount,
+            userId: order.userId,
+            supported_coin_id: order.supported_coin_id,
+          });
+        } else {
+          await this.coinsService.addMyCoin({
+            amount: order.amount,
+            userId: order.userId,
+            supported_coin_id: order.supported_coin_id,
+          });
+        }
         await this.ordersService.updateMyOrder(
           {
             id: id,
@@ -152,7 +169,7 @@ export class OrdersController {
           },
         );
         await this.notificationsService.createNotifications({
-          userId: 1,
+          userId: order.userId,
           type: 'order',
           description: `Your order to ${
             order.buy_type === 1 ? 'buy' : 'sell'
