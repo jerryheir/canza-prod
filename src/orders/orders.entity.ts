@@ -22,7 +22,7 @@ export class Orders {
   @Column()
   request_amount: number;
   @Column({ default: 'created' })
-  resolved_status: 'created' | 'pending' | 'completed';
+  resolved_status: 'created' | 'pending' | 'initiated' | 'confirmed';
   @Column({ default: null })
   resolved_by: number;
   @Column({ default: 1 })
@@ -31,6 +31,16 @@ export class Orders {
   amount_resolved_at: number;
   @Column({ default: null })
   currency_resolved_at: Currency;
+  @Column({ default: null })
+  address?: string;
+  @Column({ default: null })
+  agent_address?: string;
+  @Column({ default: null })
+  tx_id: string;
+  @Column({ default: null })
+  bank_name: string;
+  @Column({ default: null })
+  account_number: string;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()

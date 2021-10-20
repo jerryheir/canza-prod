@@ -1,8 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
+import { Supported } from '../../interfaces';
 
 export class SupportedCoinsDto {
   @IsNotEmpty()
-  type: 'btc' | 'eth' | 'cusd';
+  type: Supported;
   @IsNotEmpty()
   image_url: string;
   @IsNotEmpty()
@@ -30,4 +31,6 @@ export class SendCoinDto {
   amount: number;
   @IsNotEmpty()
   supported_coin_id: number;
+  @IsNotEmpty()
+  to: string;
 }

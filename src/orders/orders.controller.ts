@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Req,
   UnauthorizedException,
@@ -21,6 +22,7 @@ import { CreateOrderDto, UpdateOrderDto } from './dto/orders.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
 import { CoinsService } from '../coins/coins.service';
+import { Currencies } from '../coins/currencies';
 
 @Controller(`${API_VERSION}orders`)
 export class OrdersController {
@@ -29,6 +31,7 @@ export class OrdersController {
     private readonly ordersService: OrdersService,
     private readonly coinsService: CoinsService,
     private readonly notificationsService: NotificationsService,
+    private readonly currencies: Currencies,
   ) {}
 
   @Get('me')
@@ -74,53 +77,49 @@ export class OrdersController {
   async updateMyOrder(
     @Param('id') id: number,
     @Body() updateOrderDto: UpdateOrderDto,
-  ): Promise<responseData> {
+  ) {
     try {
       const order = await this.ordersService.getAnOrder({ id: id });
+      if (order.buy_type === 1 && updateOrderDto.address) {
+        return new BadRequestException('Bad Request');
+      }
+      if (
+        order.buy_type === 2 &&
+        (!updateOrderDto.agent_address ||
+          updateOrderDto.bank_name ||
+          updateOrderDto.account_number)
+      ) {
+        return new BadRequestException('Bad Request');
+      }
       const supported = await this.coinsService.getOneSupportedCoin({
         id: order.supported_coin_id,
       });
-      if (
-        order &&
-        updateOrderDto &&
-        updateOrderDto.resolved_by &&
-        !order.resolved_by
-      ) {
-        const resolvingUser = await this.usersService.findOne({
-          id: updateOrderDto.resolved_by,
-        });
-        if (resolvingUser) {
-          await this.ordersService.updateMyOrder(
-            {
-              id: id,
-            },
-            {
-              ...updateOrderDto,
-              resolved_status: 'pending',
-            },
-          );
-          await this.notificationsService.createNotifications({
-            userId: 1,
-            type: 'order',
-            description: `Your order to ${
-              order.buy_type === 1 ? 'buy' : 'sell'
-            } ${
-              order.amount
-            } ${supported.type.toUpperCase()} has been accepted by ${
-              resolvingUser.firstname
-            } ${resolvingUser.lastname}.`,
-            metadata: JSON.stringify({ ...order, resolved_status: 'pending' }),
-          });
-          return {
-            status: 'success',
-            message: 'Order updated successfully',
-          };
-        } else {
-          throw new BadRequestException();
-        }
-      } else {
-        throw new BadRequestException();
-      }
+      const resolvingUser = await this.usersService.findOne({
+        id: updateOrderDto.resolved_by,
+      });
+      await this.ordersService.updateMyOrder(
+        {
+          id: id,
+        },
+        {
+          ...updateOrderDto,
+          resolved_status: 'pending',
+        },
+      );
+      await this.notificationsService.createNotifications({
+        userId: order.userId,
+        type: 'order',
+        description: `Your order to ${order.buy_type === 1 ? 'buy' : 'sell'} ${
+          order.amount
+        } ${supported.type.toUpperCase()} has been accepted by ${
+          resolvingUser.firstname
+        } ${resolvingUser.lastname}.`,
+        metadata: JSON.stringify({ ...order, resolved_status: 'pending' }),
+      });
+      return {
+        status: 'success',
+        message: 'Order updated successfully',
+      };
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException('An error occurred!');
@@ -191,6 +190,26 @@ export class OrdersController {
     }
   }
 
+  @Delete('/:id')
+  @UseGuards(RolesGuard)
+  async deleteMyOrder(@Param('id') id: number): Promise<responseData> {
+    try {
+      const order = await this.ordersService.getAnOrder({ id: id });
+      if (order && !order.resolved_by && order.resolved_status === 'created') {
+        await this.ordersService.deleteMyOrder({ id: id });
+        return {
+          status: 'success',
+          message: 'Order deleted successfully',
+        };
+      } else {
+        throw new BadRequestException();
+      }
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException('An error occurred!');
+    }
+  }
+
   @Post('create')
   @UseGuards(RolesGuard)
   async createOrder(
@@ -202,72 +221,137 @@ export class OrdersController {
       const supported = await this.coinsService.getOneSupportedCoin({
         id: createOrderDto.supported_coin_id,
       });
-      /*const swapRate = await this.coinsService.getSwapRate(
-        supported.coin_name,
-        ['ngn'],
-      );
-      const rate =
-        swapRate.find((a) => a.currency === 'ngn').value *
-        createOrderDto.amount;*/
-      if (createOrderDto.buy_type === 1) {
-        if (user.wallet_balance - createOrderDto.request_amount < 0) {
-          return new BadRequestException(
-            'Insufficient funds. Fund your wallet and try again.',
-          );
+      const myCoin = await this.coinsService.findOneCoin({
+        userId: user.id,
+        supported_coin_id: createOrderDto.supported_coin_id,
+      });
+      let wallet = null;
+      if (createOrderDto.buy_type === 1 && supported) {
+        if (!myCoin) {
+          wallet = await this.currencies.getWallet(supported.type);
+          console.log('wallet', wallet);
+          await this.coinsService.addMyCoin({
+            amount: 0,
+            userId: user.id,
+            supported_coin_id: createOrderDto.supported_coin_id,
+            private_key: wallet.privateKey,
+            address: wallet.address,
+          });
         }
-        await this.usersService.findAndUpdate(
+      }
+      if (
+        createOrderDto.buy_type === 2 &&
+        supported &&
+        (!myCoin ||
+          (myCoin && parseFloat(myCoin.amount) - createOrderDto.amount < 0) ||
+          !(createOrderDto.bank_name && createOrderDto.account_number))
+      ) {
+        return new BadRequestException('Bad Request');
+      }
+      if (
+        (supported && myCoin && myCoin.address) ||
+        (supported && wallet && wallet.address)
+      ) {
+        const address =
+          createOrderDto.buy_type === 1 && supported && myCoin && myCoin.address
+            ? myCoin.address
+            : wallet.address;
+        const data = await this.ordersService.createOrder({
+          ...createOrderDto,
+          userId: user.id,
+          address: address,
+        });
+        await this.notificationsService.createNotifications({
+          userId: 1,
+          type: 'order',
+          description: `Your request to ${
+            createOrderDto.buy_type === 1 ? 'buy' : 'sell'
+          } ${
+            createOrderDto.amount
+          } ${supported.type.toUpperCase()} was posted on the Canza Market Place.`,
+          metadata: JSON.stringify({
+            ...createOrderDto,
+            resolved_status: 'created',
+          }),
+        });
+        return {
+          status: 'success',
+          message: 'Order created successfully',
+          data: data,
+        };
+      } else {
+        return new BadRequestException('Bad request. Check and try again.');
+      }
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException('An error occurred!');
+    }
+  }
+
+  @Put('user/initiated/:id')
+  @UseGuards(RolesGuard)
+  async userInitiated(@Req() request: Request, @Param('id') id: number) {
+    try {
+      const user = request['guardUser'];
+      const order = await this.ordersService.getAnOrder({
+        userId: user.id,
+        id: id,
+      });
+      if (
+        order &&
+        order.resolved_by &&
+        order.resolved_status === 'pending' &&
+        order.buy_type === 1
+      ) {
+        await this.ordersService.updateMyOrder(
           {
-            id: user.id,
+            id: id,
           },
           {
-            wallet_balance:
-              user.wallet_balance - createOrderDto.request_amount >= 0
-                ? user.wallet_balance - createOrderDto.request_amount
-                : user.wallet_balance,
+            resolved_status: 'initiated',
           },
         );
+        return {
+          status: 'success',
+          message: 'Order has been initiated',
+        };
+      } else {
+        return new BadRequestException('Bad Request');
       }
-      if (createOrderDto.buy_type === 2) {
-        const myCoin = await this.coinsService.findOneCoin({
-          userId: user.id,
-          supported_coin_id: createOrderDto.supported_coin_id,
-        });
-        if (
-          myCoin.amount - createOrderDto.amount <
-          0 /* Subtract the percentage for fee also */
-        ) {
-          return new BadRequestException(
-            'Insufficient assets. Check your assets and try again.',
-          );
-        }
-        await this.coinsService.updateMyCoin(myCoin.id, {
-          amount:
-            myCoin.amount -
-            createOrderDto.amount /* Subtract the percentage for fee also */,
-        });
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException('An error occurred!');
+    }
+  }
+
+  @Put('agent/initiated/:id')
+  @UseGuards(RolesGuard)
+  async agentInitiated(@Param('id') id: number) {
+    try {
+      const order = await this.ordersService.getAnOrder({
+        id: id,
+      });
+      if (
+        order &&
+        order.resolved_by &&
+        order.resolved_status === 'pending' &&
+        order.buy_type === 2
+      ) {
+        await this.ordersService.updateMyOrder(
+          {
+            id: id,
+          },
+          {
+            resolved_status: 'initiated',
+          },
+        );
+        return {
+          status: 'success',
+          message: 'Order has been initiated',
+        };
+      } else {
+        return new BadRequestException('Bad Request');
       }
-      const data = await this.ordersService.createOrder({
-        ...createOrderDto,
-        userId: user.id,
-      });
-      await this.notificationsService.createNotifications({
-        userId: 1,
-        type: 'order',
-        description: `Your request to ${
-          createOrderDto.buy_type === 1 ? 'buy' : 'sell'
-        } ${
-          createOrderDto.amount
-        } ${supported.type.toUpperCase()} was posted on the Canza Market Place.`,
-        metadata: JSON.stringify({
-          ...createOrderDto,
-          resolved_status: 'created',
-        }),
-      });
-      return {
-        status: 'success',
-        message: 'Order created successfully',
-        data: data,
-      };
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException('An error occurred!');

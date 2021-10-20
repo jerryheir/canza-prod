@@ -23,6 +23,8 @@ import { Orders } from './orders/orders.entity';
 import { Notifications } from './notifications/notifications.entity';
 import { Issue } from './issue/issue.entity';
 import { Transactions } from './transactions/transactions.entity';
+import { Currencies } from './coins/currencies';
+import { Bitcoin } from './coins/currencies/bitcoin';
 
 @Module({
   imports: [
@@ -88,6 +90,7 @@ import { Transactions } from './transactions/transactions.entity';
     TransactionsService,
     NotificationsService,
     IssueService,
+    Currencies,
   ],
 })
 export class AppModule {}

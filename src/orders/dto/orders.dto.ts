@@ -12,6 +12,10 @@ export class CreateOrderDto {
   location_id?: number;
   @IsNotEmpty()
   request_amount: number;
+  @IsOptional()
+  bank_name?: string;
+  @IsOptional()
+  account_number?: string;
 }
 
 export class UpdateOrderDto {
@@ -21,4 +25,12 @@ export class UpdateOrderDto {
   amount_resolved_at: number;
   @IsNotEmpty()
   currency_resolved_at: Currency;
+  @IsOptional()
+  address?: string;
+  @IsOptional()
+  agent_address: string;
+  @IsOptional()
+  bank_name?: string;
+  @IsOptional()
+  account_number?: string;
 }

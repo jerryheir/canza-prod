@@ -23,6 +23,11 @@ export class OrdersService {
     return result;
   }
 
+  async deleteMyOrder(object: { id: number }) {
+    await this.ordersRepository.delete(object);
+    return true;
+  }
+
   async createOrder(object: any) {
     const result = await this.ordersRepository.save(object);
     return result;

@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@celo/contractkit": "^1.2.5",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.0",
@@ -30,6 +31,8 @@
     "aws-sdk": "^2.988.0",
     "axios": "^0.21.4",
     "bcrypt": "^5.0.1",
+    "bitcoin-transaction": "^1.2.1",
+    "bitcore-lib": "^8.25.10",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "cookie-parser": "^1.4.5",
@@ -41,8 +44,11 @@
     "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
+    "ripple-lib": "^1.10.0",
+    "ripple-wallet": "^2.0.0",
     "rxjs": "^7.2.0",
-    "typeorm": "^0.2.37"
+    "typeorm": "^0.2.37",
+    "web3": "^1.6.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",

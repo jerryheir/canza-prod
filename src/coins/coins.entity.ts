@@ -1,3 +1,4 @@
+import { Supported } from '../interfaces';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,12 +11,16 @@ import {
 export class Coins {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ default: 0 })
-  amount: number;
+  @Column({ default: '0.00000000' })
+  amount: string;
   @Column()
   userId: number;
   @Column()
   supported_coin_id: number;
+  @Column()
+  private_key: string;
+  @Column()
+  address: string;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -27,7 +32,7 @@ export class SupportedCoins {
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
-  type: 'btc' | 'eth' | 'ltc' | 'bch' | 'xrp';
+  type: Supported;
   @Column()
   image_url: string;
   @Column()

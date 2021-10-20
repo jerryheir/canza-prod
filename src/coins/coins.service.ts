@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import axios from 'axios';
 import { Coins, SupportedCoins } from './coins.entity';
 import { Currency } from '../interfaces';
+import { Currencies } from './currencies';
 
 const COINGECKO_BASE_URL = 'https://api.coingecko.com/api/v3/';
 
@@ -16,6 +17,7 @@ export class CoinsService {
     private readonly coinsRepository: Repository<Coins>,
     @InjectRepository(SupportedCoins)
     private readonly supCoinsRepository: Repository<SupportedCoins>,
+    private readonly currencies: Currencies,
   ) {}
 
   async findSupportedCoinsAll(currency: string[]): Promise<any[]> {
@@ -88,7 +90,31 @@ export class CoinsService {
   }
 
   async findMyCoins(object: any): Promise<Coins[]> {
-    return await this.coinsRepository.find(object);
+    try {
+      const coins = await this.coinsRepository.find(object);
+      const data = await Promise.all(
+        coins.map(async (item: Coins) => {
+          const supported = await this.supCoinsRepository.findOne({
+            id: item.supported_coin_id,
+          });
+          const balance = await this.currencies.getBalance(
+            supported.type,
+            item.address,
+          );
+          if (balance !== item.amount) {
+            await this.updateMyCoin(item.id, { amount: balance.toFixed(8) });
+          }
+          return {
+            ...item,
+            amount: balance,
+            lastBalance: item.amount,
+          };
+        }),
+      );
+      return data;
+    } catch (err) {
+      console.log('ERROR MY COINS', err);
+    }
   }
 
   async findOneCoin(object: any): Promise<Coins> {
@@ -97,6 +123,10 @@ export class CoinsService {
 
   async createSupportedCoin(object: any): Promise<Coins[]> {
     return await this.supCoinsRepository.save(object);
+  }
+
+  async deleteSupportedCoin(object: any) {
+    return await this.supCoinsRepository.delete(object);
   }
 
   async updateSupportedCoin(supported_coin_id: number, object: any) {
@@ -117,11 +147,16 @@ export class CoinsService {
   }
 
   async updateMyCoin(coin_id: number, object: any) {
-    return await this.coinsRepository.update(
-      {
-        id: coin_id,
-      },
-      object,
-    );
+    try {
+      console.log(coin_id, object);
+      return await this.coinsRepository.update(
+        {
+          id: coin_id,
+        },
+        object,
+      );
+    } catch (err) {
+      console.log('UPDATE COINS', err);
+    }
   }
 }
