@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const bitcore = require('bitcore-lib');
-const bitcoinTransaction = require('bitcoin-transaction');
+const Insight = require('bitcore-insight').Insight;
+const insight = new Insight('https://explorer.btc.zelcore.io');
 import axios from 'axios';
 // import moment from 'moment';
 import { SendArguments } from '../../../interfaces';
@@ -17,15 +18,35 @@ export class Bitcoin {
     return { privateKey: privateKey, address: address.toString() };
   }
   async sendBitcoin(object: SendArguments) {
-    const tx = await bitcoinTransaction.sendTransaction({
-      from: object.from,
-      to: object.to,
-      privKeyWIF: object.privateKey,
-      btc: object.amount,
-      network: 'testnet',
-      minConfirmations: 2,
+    const privateKey = bitcore.PrivateKey.fromWIF(object.privateKey);
+    const satoshis = parseInt(
+      (parseFloat(object.amount) * 100000000).toFixed(0),
+    );
+    if (satoshis < 15000) return { error: 'Balance too small' };
+    const txId = insight.getUtxos(object.from, (err, utxos) => {
+      if (err) {
+        console.log('SEND_BTC', err);
+      } else {
+        console.log('UTXOS', satoshis, utxos);
+        const tx = bitcore.Transaction();
+        tx.from(utxos);
+        tx.to(object.to, satoshis);
+        tx.change('18whDyhMyewqKvEG1Gs9jqYUvvhyRS1m4d');
+        // tx.fee(20000);
+        tx.sign(privateKey);
+        tx.serialize();
+        const txId = insight.broadcast(tx.toString(), (err, returnedTxId) => {
+          if (err) {
+            console.log('BROADCAST ERROR', err);
+          } else {
+            console.log('SUCCESSFUL TRANSACTION', returnedTxId);
+            return returnedTxId;
+          }
+        });
+        return txId;
+      }
     });
-    console.log('BTC TX', tx);
+    return txId;
   }
   async verifyTransaction(object: { address: string; txId: string }) {
     const data = await axios.get(

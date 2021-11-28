@@ -101,7 +101,7 @@ export class CoinsService {
             supported.type,
             item.address,
           );
-          if (balance !== item.amount) {
+          if (balance !== parseFloat(item.amount)) {
             await this.updateMyCoin(item.id, { amount: balance.toFixed(8) });
           }
           return {

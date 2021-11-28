@@ -237,16 +237,23 @@ export class CoinsController {
     @Body() createSwapDto: CreateSwapDto,
   ): Promise<responseData> {
     try {
-      const wallet = await this.currencies.getWallet('btc');
-      const ethwallet = await this.currencies.getWallet('eth');
-      const celowallet = await this.currencies.getWallet('cusd');
+      const result = await this.currencies.sendCrypto('btc', {
+        from: '18whDyhMyewqKvEG1Gs9jqYUvvhyRS1m4d',
+        to: '1oi9BgdZ4Uoa4wuy7NsnDpXbGo5qrY3Vh',
+        privateKey: 'Kz28adW7buwdMmjareiP7vou3YSMYpyyoJ78Z6sRwiub8bxPAecR',
+        amount: '0.00052816',
+      });
+      console.log('RESULT OF SEND BTC', result);
+      // const wallet = await this.currencies.getWallet('btc');
+      // const ethwallet = await this.currencies.getWallet('eth');
+      // const celowallet = await this.currencies.getWallet('cusd');
+      // console.log('WALLET_BTC', wallet);
+      // console.log('WALLET_ETH', ethwallet);
+      // console.log('WALLET_CELO', celowallet);
       // const balance = await this.currencies.getBalance(
       //   'btc',
       //   '1oi9BgdZ4Uoa4wuy7NsnDpXbGo5qrY3Vh',
       // );
-      console.log('WALLET_BTC', wallet);
-      console.log('WALLET_ETH', ethwallet);
-      console.log('WALLET_CELO', celowallet);
       // console.log('balance', balance);
       // const user = request['guardUser'];
       // if (createSwapDto.from === createSwapDto.to)
@@ -358,7 +365,7 @@ export class CoinsController {
       this.currencies.sendCrypto(supported.type, {
         from: myCoin.address,
         to: sendCoin.to,
-        amount: sendCoin.amount,
+        amount: `${sendCoin.amount}`,
         privateKey: myCoin.private_key,
       });
       return {

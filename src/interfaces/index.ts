@@ -19,5 +19,5 @@ export interface SendArguments {
   from: string;
   to: string;
   privateKey: string;
-  amount: number;
+  amount: string;
 }
