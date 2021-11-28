@@ -31,8 +31,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: canza-app-prod
-          environment_name: Canzaappprod-env
-          version_label: "canza-app-prod-${{ steps.format-time.outputs.replaced }}"
+          application_name: canza-prod
+          environment_name: Canzaprod-env
+          version_label: "canza-prod-${{ steps.format-time.outputs.replaced }}"
           region: us-east-2
           deployment_package: deploy.zip
