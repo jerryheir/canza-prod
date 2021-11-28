@@ -20,7 +20,7 @@ services:
       WAIT_HOSTS: mysql:3306
     command: ["./wait-for-it/wait-for-it.sh", "db:3306", "--", "yarn",  "start:dev"]
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - db # Wait until database service is loaded
     networks:

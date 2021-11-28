@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
-const PORT = process.env.port || 8000;
+const PORT = process.env.port || 8080;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
