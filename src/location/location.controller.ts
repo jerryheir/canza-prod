@@ -21,7 +21,7 @@ import { LocationService } from './location.service';
 export class LocationController {
   constructor(
     // private readonly usersService: UsersService,
-    private locationService: LocationService,
+    private readonly locationService: LocationService,
   ) {}
 
   @Get('/:id')
@@ -55,16 +55,21 @@ export class LocationController {
   @Post('/create')
   @UseGuards(RolesGuard)
   async createLocation(@Req() req, @Body() locationDto: LocationCreateDto) {
-    console.log('REQUEST', req);
     try {
-      const result = await this.locationService.createLocation(locationDto);
-      return {
-        status: 'success',
-        message: 'Location created successfully',
-        data: result,
-      };
+      const user = req['guardUser'];
+      if (user && user.role > 2) {
+        const result = await this.locationService.createLocation(locationDto);
+        return {
+          status: 'success',
+          message: 'Location created successfully',
+          data: result,
+        };
+      } else {
+        throw new UnauthorizedException();
+      }
     } catch (err) {
-      throw new UnauthorizedException(err);
+      console.log('/create', err);
+      throw new InternalServerErrorException(err);
     }
   }
 
@@ -75,7 +80,6 @@ export class LocationController {
     @Body() locationDto: LocationCreateDto,
     @Param('locationId') locationId: number,
   ) {
-    console.log('REQUEST', req);
     try {
       const result = await this.locationService.updateLocation(
         { id: locationId },
@@ -87,7 +91,8 @@ export class LocationController {
         data: result,
       };
     } catch (err) {
-      throw new UnauthorizedException(err);
+      console.log(err);
+      throw new UnauthorizedException('Unauthorized');
     }
   }
 }

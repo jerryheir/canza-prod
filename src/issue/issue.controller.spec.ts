@@ -1,16 +1,25 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
 import { JwtService } from '@nestjs/jwt';
-import { TransactionsService } from '../transactions/transactions.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from '../users/users.service';
+import { IssueController } from './issue.controller';
+import { IssueService } from './issue.service';
 
-describe('UsersController', () => {
-  let controller: UsersController;
+describe('IssueController', () => {
+  let controller: IssueController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UsersController],
+      controllers: [IssueController],
       providers: [
+        {
+          provide: IssueService,
+          useValue: {
+            createIssue: jest.fn(),
+            updateIssue: jest.fn(),
+            getIssue: jest.fn(),
+            getAllIssue: jest.fn(),
+          },
+        },
         {
           provide: UsersService,
           useValue: {
@@ -36,17 +45,10 @@ describe('UsersController', () => {
             signAsync: jest.fn(),
           },
         },
-        {
-          provide: TransactionsService,
-          useValue: {
-            createTransactions: jest.fn(),
-            getMyTransactions: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
-    controller = module.get<UsersController>(UsersController);
+    controller = module.get<IssueController>(IssueController);
   });
 
   it('should be defined', () => {

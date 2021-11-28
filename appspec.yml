@@ -1,18 +1,62 @@
-version: 0.0
-os: linux
-files:
-  - source: /
-  - destination: /home/ec2-canza-user/canza-app
-hooks:
-  ApplicationStop:
-    - location: scripts/application_stop.sh
-      timeout: 300
-      runas: ec2-canza-user
-  BeforeInstall:
-    - location: scripts/before_install.sh
-      timeout: 300
-      runas: ec2-canza-user
-  ApplicationStart:
-    - location: scripts/application_start.sh
-      timeout: 300
-      runas: ec2-canza-user    
+alerts:
+- rule: DEPLOYMENT_FAILED
+- rule: DOMAIN_FAILED
+name: canza-api
+region: fra
+services:
+- dockerfile_path: Dockerfile
+  envs:
+  - key: API_VERSION
+    scope: RUN_AND_BUILD_TIME
+    value: /api/v1/
+  - key: JWT_SECRET
+    scope: RUN_AND_BUILD_TIME
+    value: CanzaToTheWorld@2021
+  - key: JWT_EXPIRE_TIME
+    scope: RUN_AND_BUILD_TIME
+    value: 30d
+  - key: RESET_EXPIRE_TIME
+    scope: RUN_AND_BUILD_TIME
+    value: 15m
+  - key: DATABASE_HOST
+    scope: RUN_AND_BUILD_TIME
+    value: canza-mysql-db-do-user-9859120-0.b.db.ondigitalocean.com
+  - key: DATABASE_PORT
+    scope: RUN_AND_BUILD_TIME
+    value: "25060"
+  - key: DATABASE_USERNAME
+    scope: RUN_AND_BUILD_TIME
+    value: doadmin
+  - key: DATABASE_PASSWORD
+    scope: RUN_AND_BUILD_TIME
+    value: Z7oBDxADnh7OB1yO
+  - key: DATABASE_NAME
+    scope: RUN_AND_BUILD_TIME
+    value: defaultdb
+  - key: EMAIL_SMTP_ADDRESS
+    scope: RUN_AND_BUILD_TIME
+    value: canzadev@outlook.com
+  - key: EMAIL_SMTP_PASSWORD
+    scope: RUN_AND_BUILD_TIME
+    value: Canza@123
+  - key: AWS_S3_BUCKET_NAME
+    scope: RUN_AND_BUILD_TIME
+    value: canza-app
+  - key: AWS_ACCESS_KEY_ID
+    scope: RUN_AND_BUILD_TIME
+    value: AKIA4S2WW3SNHHDMIW7N
+  - key: AWS_SECRET_ACCESS_KEY
+    scope: RUN_AND_BUILD_TIME
+    value: PpJzGNvldx06bYrtMlbs1oNM/+620fZIgdlX3izW
+  github:
+    branch: production
+    deploy_on_push: true
+    repo: jerryheir/Canza-API
+  http_port: 8000
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  name: canza-api
+  routes:
+  - path: /
+  run_command: yarn start:prod
+  source_dir: /

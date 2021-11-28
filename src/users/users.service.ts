@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -6,19 +11,20 @@ import { Repository } from 'typeorm';
 import * as nodemailer from 'nodemailer';
 import { S3 } from 'aws-sdk';
 import { Response } from 'express';
-import { RegisterDto } from './dto/users.dto';
-import { User } from './users.entity';
+import { Contacts, User } from './users.entity';
 import {
   emailverification,
   getNewPassword,
   requestNewPassword,
 } from '../users/templates/verifyEmail';
-import { API_VERSION } from 'src/helpers';
+import { API_VERSION } from '../helpers';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @InjectRepository(Contacts)
+    private readonly contactsRepository: Repository<Contacts>,
     private readonly configService: ConfigService,
     private jwtService: JwtService,
   ) {}
@@ -30,7 +36,7 @@ export class UsersService {
     },
   });
 
-  async registerService(registerDto: RegisterDto) {
+  async registerService(registerDto: any) {
     const result = await this.usersRepository.save({
       ...registerDto,
       google_signin: 0,
@@ -39,10 +45,15 @@ export class UsersService {
   }
 
   verifyEmail(result: { id: number; email: string }) {
-    const emailToken = this.jwtService.sign({
-      id: result.id,
-    });
-    const url = `http://localhost:8000/${API_VERSION}confirmation_code/${emailToken}`;
+    const emailToken = this.jwtService.sign(
+      {
+        id: result.id,
+      },
+      {
+        expiresIn: '15m',
+      },
+    );
+    const url = `https://canza-api-6dbce.ondigitalocean.app/${API_VERSION}confirmation_code/${emailToken}`;
     const options = {
       from: this.configService.get('EMAIL_SMTP_ADDRESS'),
       to: result.email,
@@ -55,12 +66,49 @@ export class UsersService {
     });
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.usersRepository.find();
+  async findAll(a?: any): Promise<any[]> {
+    const data = await this.usersRepository.find(a);
+    const result = data
+      ? data.map((i) => {
+          return {
+            id: i.id,
+            email: i.email,
+            verified: i.verified,
+            firstname: i.firstname,
+            lastname: i.lastname,
+            location: i.location,
+            image_url: i.image_url,
+            phone: i.phone,
+            banned: i.banned,
+          };
+        })
+      : [];
+    return result;
   }
 
-  async findOne(object: any): Promise<User> {
-    return await this.usersRepository.findOne(object);
+  async findOne(object: any): Promise<any> {
+    const i = await this.usersRepository.findOne(object);
+    return {
+      id: i.id,
+      email: i.email,
+      verified: i.verified,
+      firstname: i.firstname,
+      lastname: i.lastname,
+      location: i.location,
+      image_url: i.image_url,
+      phone: i.phone,
+      banned: i.banned,
+      wallet_balance: i.wallet_balance,
+      password: i.password,
+      role: i.role,
+    };
+  }
+
+  async getWalletBalance(object: any): Promise<any> {
+    const i = await this.usersRepository.findOne(object);
+    return {
+      wallet_balance: i.wallet_balance,
+    };
   }
 
   async findAndUpdate(i: any, object: any) {
@@ -92,7 +140,7 @@ export class UsersService {
         expiresIn: '15m',
       },
     );
-    const url = `http://localhost:8000/${API_VERSION}reset/${emailToken}`;
+    const url = `https://canza-api-6dbce.ondigitalocean.app/${API_VERSION}reset/${emailToken}`;
     const options = {
       from: this.configService.get('EMAIL_SMTP_ADDRESS'),
       to: email,
@@ -148,6 +196,7 @@ export class UsersService {
       }
       return user;
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
     }
   }
@@ -157,12 +206,60 @@ export class UsersService {
       const jwt = auth.replace('Bearer ', '');
       const { id } = this.jwtService.verify(jwt);
       const user = await this.usersRepository.findOne({ id });
-      if (user && user.role > 1) {
+      if (user && user.role > 2) {
         return user;
+      } else {
+        throw new UnauthorizedException('Unauthorized');
       }
-      throw new UnauthorizedException('Unauthorized');
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedException('Unauthorized');
+    }
+  }
+
+  async getMyContacts(id: number) {
+    try {
+      const res = await this.contactsRepository.find({ userId: id });
+      const ids = [...new Set(res.map((item) => item.contact_id))];
+      const data = await this.usersRepository.findByIds(ids);
+      const result = data
+        ? data.map((i) => {
+            return {
+              id: i.id,
+              email: i.email,
+              verified: i.verified,
+              firstname: i.firstname,
+              lastname: i.lastname,
+              location: i.location,
+              image_url: i.image_url,
+              phone: i.phone,
+              banned: i.banned,
+            };
+          })
+        : [];
+      return result;
+    } catch (err) {
+      return [];
+    }
+  }
+
+  async addContact(object: { userId: number; contact_id: number }) {
+    try {
+      await this.contactsRepository.save(object);
+      return object;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async deleteContact(object: { userId: number; contact_id: number }) {
+    try {
+      await this.contactsRepository.delete(object);
+      return true;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException();
     }
   }
 }
