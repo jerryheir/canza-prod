@@ -29,7 +29,7 @@ import {
   FundWalletDto,
 } from './dto/users.dto';
 import { UsersService } from './users.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import { verificationDone } from '../users/templates/verifyEmail';
 import { API_VERSION, generateRandomHash } from '../helpers';
