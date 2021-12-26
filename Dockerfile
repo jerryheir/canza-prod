@@ -14,11 +14,9 @@ COPY . .
 
 RUN npm i -g @nestjs/cli
 
-RUN export NODE_OPTIONS=--max-old-space-size=8192
-
 RUN yarn install
 
-RUN yarn build
+RUN export NODE_OPTIONS=--max-old-space-size=8192 && yarn build
 
 EXPOSE 8080
 
