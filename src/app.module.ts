@@ -32,11 +32,11 @@ import { Currencies } from './coins/currencies';
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         type: 'mysql',
-        host: '127.0.0.1',
+        host: config.get('DATABASE_HOST'),
         // port: config.get('DATABASE_PORT'),
-        username: 'user',
-        password: 'pass',
-        database: 'db',
+        username: config.get('DATABASE_USERNAME'),
+        password: config.get('DATABASE_PASSWORD'),
+        database: config.get('DATABASE_NAME'),
         entities: [
           User,
           Location,
@@ -49,7 +49,6 @@ import { Currencies } from './coins/currencies';
           Contacts,
         ],
         synchronize: true,
-        keepConnectionAlive: true,
       }),
       inject: [ConfigService],
     }),
