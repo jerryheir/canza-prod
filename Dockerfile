@@ -12,6 +12,10 @@ RUN ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 COPY . .
 
+RUN npm i -g @nestjs/cli
+
+RUN export NODE_OPTIONS=--max-old-space-size=8192
+
 RUN yarn install
 
 RUN yarn build
