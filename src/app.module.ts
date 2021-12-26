@@ -32,7 +32,7 @@ import { Currencies } from './coins/currencies';
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         type: 'mysql',
-        host: 'localhost',
+        // host: 'localhost',
         // port: config.get('DATABASE_PORT'),
         username: 'user',
         password: 'pass',
