@@ -1,3 +1,7 @@
+FROM python:3.7-alpine3.12
+
+RUN apk update && apk add bash
+
 FROM node:14.16.0
 
 WORKDIR /app
@@ -9,9 +13,6 @@ RUN curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-co
 RUN chmod +x /usr/local/bin/docker-compose
 
 RUN ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-
-FROM python:3.7-alpine3.12
-RUN apk update && apk add bash
 
 COPY . .
 
