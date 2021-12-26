@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:14.16.0
 
 WORKDIR /app
 
@@ -10,6 +10,7 @@ RUN chmod +x /usr/local/bin/docker-compose
 
 RUN ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
+FROM python:3.7-alpine3.12
 RUN apk update && apk add bash
 
 COPY . .
