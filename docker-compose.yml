@@ -5,10 +5,10 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
-      MYSQL_DATABASE: "${DATABASE_NAME}"
-      MYSQL_ROOT_USER: "${DATABASE_USERNAME}"
-      MYSQL_PASSWORD: "${DATABASE_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "pass"
+      MYSQL_DATABASE: "db"
+      MYSQL_ROOT_USER: "user"
+      MYSQL_PASSWORD: "pass"
     networks:
       - app-network
   backend:
@@ -16,9 +16,9 @@ services:
     environment:
       DATABASE_HOST: db
       DATABASE_PORT: "${DATABASE_PORT}"
-      DATABASE_USERNAME: "${DATABASE_USERNAME}"
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_USERNAME: "user"
+      DATABASE_PASSWORD: "pass"
+      DATABASE_NAME: "db"
       WAIT_HOSTS: mysql:3306
     command: ["./wait-for-it/wait-for-it.sh", "db:3306", "--", "yarn",  "start:prod"]
     ports:
