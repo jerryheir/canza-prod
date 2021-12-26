@@ -24,7 +24,6 @@ import { Notifications } from './notifications/notifications.entity';
 import { Issue } from './issue/issue.entity';
 import { Transactions } from './transactions/transactions.entity';
 import { Currencies } from './coins/currencies';
-import { Bitcoin } from './coins/currencies/bitcoin';
 
 @Module({
   imports: [
@@ -34,7 +33,7 @@ import { Bitcoin } from './coins/currencies/bitcoin';
       useFactory: (config: ConfigService) => ({
         type: 'mysql',
         host: config.get('DATABASE_HOST'),
-        port: config.get('DATABASE_PORT'),
+        // port: config.get('DATABASE_PORT'),
         username: config.get('DATABASE_USERNAME'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
@@ -50,6 +49,7 @@ import { Bitcoin } from './coins/currencies/bitcoin';
           Contacts,
         ],
         synchronize: true,
+        keepConnectionAlive: true,
       }),
       inject: [ConfigService],
     }),
