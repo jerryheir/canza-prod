@@ -10,6 +10,8 @@ RUN chmod +x /usr/local/bin/docker-compose
 
 RUN ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
+RUN apk update && apk add bash
+
 COPY . .
 
 RUN npm i -g @nestjs/cli
